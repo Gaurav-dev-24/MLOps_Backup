@@ -24,8 +24,8 @@ export default function Home() {
           </h1>
           
           <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Instantly extract text, forms, and tables from any document using AWS Textract. 
-            Secure, scalable, and completely serverless.
+            Transform unstructured documents into actionable data with enterprise-grade accuracy. 
+            Leverage AWS Textract for automated, high-fidelity extraction within a secure, highly scalable serverless architecture.
           </p>
         </div>
 

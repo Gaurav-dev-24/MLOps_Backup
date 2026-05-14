@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { UploadCloud, File, X, CheckCircle2 } from 'lucide-react';
+import { UploadCloud, File, X, CheckCircle2, Loader2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Button } from '../../components/ui/Button';
 import { documentService } from '../../services/documentService';
@@ -65,11 +65,37 @@ export function UploadZone() {
       // 2. Upload to S3
       await s3Service.uploadFile(uploadUrl, file, (p) => setProgress(p));
 
-      // 3. Complete
+      // 3. Poll for extraction completion
+      setStatus('processing');
+      
+      let isDone = false;
+      let retries = 0;
+      
+      while (!isDone && retries < 20) { // Max wait 40 seconds
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        retries++;
+        
+        try {
+          // Since GET /documents/{id} doesn't exist, we poll the list and find our file
+          const allDocs = await documentService.getDocuments();
+          const ourDoc = allDocs.find(d => 
+            d.filename === file.name || 
+            d.id === documentId
+          );
+
+          if (ourDoc && (ourDoc.status === 'COMPLETED' || ourDoc.status === 'FAILED')) {
+            isDone = true;
+          }
+        } catch (e) {
+          // Keep polling if API fails
+        }
+      }
+
+      // 4. Complete
       setStatus('success');
       setTimeout(() => {
         navigate('/dashboard');
-      }, 1500);
+      }, 1000);
 
     } catch (error) {
       console.error("Upload failed", error);
@@ -152,16 +178,29 @@ export function UploadZone() {
             </div>
           )}
 
+          {status === 'processing' && (
+            <div className="flex items-center gap-3 text-blue-600 dark:text-blue-400 mb-6 bg-blue-50 dark:bg-blue-500/10 p-4 rounded-xl shadow-sm border border-blue-100 dark:border-blue-500/20">
+              <Loader2 className="h-5 w-5 animate-spin shrink-0" />
+              <div className="flex flex-col">
+                <span className="font-semibold">Extracting the fields...</span>
+                <span className="text-sm opacity-80">AWS Textract is analyzing your document. This usually takes 10-20 seconds.</span>
+              </div>
+            </div>
+          )}
+
           {status === 'success' && (
-            <div className="flex items-center gap-2 text-green-600 dark:text-green-400 mb-6 bg-green-50 dark:bg-green-500/10 p-3 rounded-xl">
-              <CheckCircle2 className="h-5 w-5" />
-              <span className="font-medium">Upload complete! Processing document...</span>
+            <div className="flex items-center gap-3 text-green-600 dark:text-green-400 mb-6 bg-green-50 dark:bg-green-500/10 p-4 rounded-xl shadow-sm border border-green-100 dark:border-green-500/20">
+              <CheckCircle2 className="h-5 w-5 shrink-0" />
+              <div className="flex flex-col">
+                <span className="font-semibold">Extraction Complete!</span>
+                <span className="text-sm opacity-80">Redirecting to your dashboard...</span>
+              </div>
             </div>
           )}
 
           {status === 'error' && (
-            <div className="text-red-500 text-sm mb-6 bg-red-50 dark:bg-red-500/10 p-3 rounded-xl font-medium">
-              Upload failed. Please try again.
+            <div className="text-red-500 text-sm mb-6 bg-red-50 dark:bg-red-500/10 p-3 rounded-xl font-medium border border-red-100 dark:border-red-500/20">
+              Something went wrong. Please try again.
             </div>
           )}
 
@@ -169,10 +208,11 @@ export function UploadZone() {
             <Button 
               className="flex-1"
               onClick={handleUpload}
-              isLoading={isUploading}
+              isLoading={isUploading || status === 'processing'}
               disabled={status === 'success'}
             >
-              {status === 'success' ? 'Redirecting...' : 'Extract Data'}
+              {status === 'success' ? 'Redirecting...' : 
+               status === 'processing' ? 'Processing...' : 'Extract Data'}
             </Button>
           </div>
         </div>

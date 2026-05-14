@@ -1,9 +1,9 @@
 import React from 'react';
-import { FileText, CheckCircle2, AlertCircle, Clock, ChevronRight } from 'lucide-react';
+import { FileText, CheckCircle2, AlertCircle, Clock, ChevronRight, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 
-export function DocumentCard({ document }) {
+export function DocumentCard({ document, onDelete }) {
   const isCompleted = document.status === 'COMPLETED';
   const isProcessing = document.status === 'PROCESSING';
   const isFailed = document.status === 'FAILED';
@@ -16,9 +16,18 @@ export function DocumentCard({ document }) {
 
   const StatusIcon = isCompleted ? CheckCircle2 : (isFailed ? AlertCircle : Clock);
 
+  const handleDelete = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (window.confirm("Are you sure you want to delete this document?")) {
+      onDelete(document.id);
+    }
+  };
+
   return (
     <Link 
       to={`/documents/${document.id}`}
+      state={{ document }}
       className="block group relative glass rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary-500/10 border-slate-200 dark:border-dark-800"
     >
       <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-accent-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -27,9 +36,20 @@ export function DocumentCard({ document }) {
         <div className="p-3 bg-primary-50 dark:bg-dark-800 rounded-xl text-primary-600 dark:text-primary-400">
           <FileText className="h-6 w-6" />
         </div>
-        <div className={cn("px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 border", statusColors[document.status])}>
-          <StatusIcon className={cn("h-3 w-3", isProcessing && "animate-spin")} />
-          {document.status}
+        <div className="flex items-center gap-2">
+          {onDelete && (
+            <button
+              onClick={handleDelete}
+              className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+              title="Delete Document"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
+          <div className={cn("px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 border", statusColors[document.status])}>
+            <StatusIcon className={cn("h-3 w-3", isProcessing && "animate-spin")} />
+            {document.status}
+          </div>
         </div>
       </div>
 

@@ -23,6 +23,16 @@ export default function Dashboard() {
     fetchDocs();
   }, []);
 
+  const handleDeleteDocument = async (id) => {
+    try {
+      await documentService.deleteDocument(id);
+      setDocuments(docs => docs.filter(doc => doc.id !== id));
+    } catch (error) {
+      console.error("Failed to delete document", error);
+      alert("Failed to delete document. Please try again.");
+    }
+  };
+
   const filteredDocs = documents.filter(doc => 
     doc.filename.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -62,7 +72,7 @@ export default function Dashboard() {
       ) : filteredDocs.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredDocs.map(doc => (
-            <DocumentCard key={doc.id} document={doc} />
+            <DocumentCard key={doc.id} document={doc} onDelete={handleDeleteDocument} />
           ))}
         </div>
       ) : (

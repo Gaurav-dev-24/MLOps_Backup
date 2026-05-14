@@ -14,14 +14,14 @@ export function Navbar() {
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/80 backdrop-blur-md dark:border-dark-800/80 dark:bg-dark-950/80">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <div className="bg-gradient-to-br from-primary-500 to-accent-600 p-2 rounded-xl text-white shadow-lg shadow-primary-500/30">
             <FileText className="h-5 w-5" />
           </div>
           <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">
             DocuExtract AI
           </span>
-        </div>
+        </Link>
 
         <div className="flex items-center gap-1">
           {navItems.map((item) => {

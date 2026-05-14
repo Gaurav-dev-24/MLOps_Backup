@@ -9,6 +9,7 @@ export const Button = React.forwardRef(({
   isLoading, 
   children, 
   disabled,
+  as: Component = 'button',
   ...props 
 }, ref) => {
   
@@ -28,7 +29,7 @@ export const Button = React.forwardRef(({
   };
 
   return (
-    <button
+    <Component
       ref={ref}
       disabled={disabled || isLoading}
       className={cn(baseStyles, variants[variant], sizes[size], className)}
@@ -36,7 +37,7 @@ export const Button = React.forwardRef(({
     >
       {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
       {children}
-    </button>
+    </Component>
   );
 });
 
