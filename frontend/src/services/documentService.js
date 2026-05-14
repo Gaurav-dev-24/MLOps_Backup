@@ -1,8 +1,20 @@
 import api from './api';
 
 export const documentService = {
-  getUploadUrl: async (filename, fileType) => {
-    const response = await api.post('/upload-url', { filename, fileType });
+  getUploadUrl: async (
+    fileName,
+    contentType
+  ) => {
+
+    const response =
+      await api.post(
+        '/upload-url',
+        {
+          fileName,
+          contentType
+        }
+      );
+
     return response.data;
   },
 
